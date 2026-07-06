@@ -46,7 +46,42 @@ const getContacts = async (req, res) => {
     }
 };
 
+// Delete Emergency Contact
+const deleteContact = async (req, res) => {
+    try {
+
+        const contact = await Contact.findById(req.params.id);
+
+        if (!contact) {
+            return res.status(404).json({
+                message: "Contact not found"
+            });
+        }
+
+        // Make sure the contact belongs to the logged-in user
+        if (contact.user.toString() !== req.user.id) {
+            return res.status(401).json({
+                message: "Not authorized"
+            });
+        }
+
+        await Contact.findByIdAndDelete(req.params.id);
+
+        res.status(200).json({
+            message: "Contact Deleted Successfully"
+        });
+
+    } catch (error) {
+
+        res.status(500).json({
+            message: error.message
+        });
+
+    }
+};
+
 module.exports = {
     addContact,
-    getContacts
+    getContacts,
+    deleteContact
 };
