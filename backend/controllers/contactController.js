@@ -27,6 +27,26 @@ const addContact = async (req, res) => {
     }
 };
 
+// Get Emergency Contacts
+const getContacts = async (req, res) => {
+    try {
+
+        const contacts = await Contact.find({
+            user: req.user.id
+        });
+
+        res.status(200).json(contacts);
+
+    } catch (error) {
+
+        res.status(500).json({
+            message: error.message
+        });
+
+    }
+};
+
 module.exports = {
-    addContact
+    addContact,
+    getContacts
 };
