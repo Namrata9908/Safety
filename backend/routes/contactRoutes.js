@@ -3,7 +3,8 @@ const express = require("express");
 const {
     addContact,
     getContacts,
-    deleteContact
+    deleteContact,
+    updateContact
 } = require("../controllers/contactController");
 
 const { protect } = require("../middleware/authMiddleware");
@@ -18,5 +19,8 @@ router.get("/", protect, getContacts);
 
 // Delete Emergency Contact
 router.delete("/:id", protect, deleteContact);
+
+// Update Emergency Contact
+router.put("/:id", protect, updateContact);
 
 module.exports = router;

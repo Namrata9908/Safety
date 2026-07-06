@@ -80,8 +80,50 @@ const deleteContact = async (req, res) => {
     }
 };
 
+// Update Emergency Contact
+const updateContact = async (req, res) => {
+    try {
+
+        const contact = await Contact.findById(req.params.id);
+
+        if (!contact) {
+            return res.status(404).json({
+                message: "Contact not found"
+            });
+        }
+
+        // Check ownership
+        if (contact.user.toString() !== req.user.id) {
+            return res.status(401).json({
+                message: "Not authorized"
+            });
+        }
+
+        const { name, phone, relationship } = req.body;
+
+        contact.name = name || contact.name;
+        contact.phone = phone || contact.phone;
+        contact.relationship = relationship || contact.relationship;
+
+        await contact.save();
+
+        res.status(200).json({
+            message: "Contact Updated Successfully",
+            contact
+        });
+
+    } catch (error) {
+
+        res.status(500).json({
+            message: error.message
+        });
+
+    }
+};
+
 module.exports = {
     addContact,
     getContacts,
-    deleteContact
+    deleteContact,
+    updateContact
 };
