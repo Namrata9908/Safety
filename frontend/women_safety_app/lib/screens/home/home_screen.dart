@@ -5,7 +5,6 @@ import '../auth/login_screen.dart';
 import '../../services/storage_service.dart';
 import '../../services/location_service.dart';
 import '../../services/sms_service.dart';
-import '../../services/map_service.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -45,9 +44,6 @@ class HomeScreen extends StatelessWidget {
       if (phones.isNotEmpty) {
         await SmsService.sendSOS(phones, position.latitude, position.longitude);
       }
-
-      // Open Google Maps
-      await MapService.openMap(position.latitude, position.longitude);
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(

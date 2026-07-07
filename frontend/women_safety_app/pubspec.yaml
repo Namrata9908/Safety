@@ -30,16 +30,28 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  
-  http: ^1.2.1
-  shared_preferences: ^2.2.3
-  geolocator: ^14.0.2
-  url_launcher: ^6.3.2
 
-  # The following adds the Cupertino Icons font to your application.
-  # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
 
+  # API
+  http: ^1.2.2
+
+  # Local Storage
+  shared_preferences: ^2.5.3
+
+  # GPS Location
+  geolocator: ^14.0.2
+
+  # SMS & Phone Call & Google Maps
+  url_launcher: ^6.3.2
+
+  # (Future) In-App Google Maps
+  google_maps_flutter: ^2.12.3
+
+  # (Future) Push Notifications
+  firebase_core: ^4.0.0
+  firebase_messaging: ^16.0.0
+  
 dev_dependencies:
   flutter_test:
     sdk: flutter
