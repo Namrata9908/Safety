@@ -1,9 +1,13 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'storage_service.dart';
 
 class ApiService {
   static const String baseUrl = "http://192.168.0.107:5000/api";
 
+  // ===========================
+  // LOGIN API
+  // ===========================
   static Future<Map<String, dynamic>> login(
     String email,
     String password,
@@ -12,6 +16,49 @@ class ApiService {
       Uri.parse("$baseUrl/users/login"),
       headers: {"Content-Type": "application/json"},
       body: jsonEncode({"email": email, "password": password}),
+    );
+
+    return jsonDecode(response.body);
+  }
+
+  // ===========================
+  // ADD CONTACT API
+  // ===========================
+  static Future<Map<String, dynamic>> addContact(
+    String name,
+    String phone,
+    String relationship,
+  ) async {
+    String? token = await StorageService.getToken();
+
+    final response = await http.post(
+      Uri.parse("$baseUrl/contacts"),
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer $token",
+      },
+      body: jsonEncode({
+        "name": name,
+        "phone": phone,
+        "relationship": relationship,
+      }),
+    );
+
+    return jsonDecode(response.body);
+  }
+
+  // ===========================
+  // GET CONTACTS API
+  // ===========================
+  static Future<List<dynamic>> getContacts() async {
+    String? token = await StorageService.getToken();
+
+    final response = await http.get(
+      Uri.parse("$baseUrl/contacts"),
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer $token",
+      },
     );
 
     return jsonDecode(response.body);

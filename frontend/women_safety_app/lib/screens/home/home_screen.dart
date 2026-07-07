@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import '../auth/login_screen.dart';
 import '../../services/storage_service.dart';
+import '../auth/login_screen.dart';
+import '../contacts/contacts_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -8,10 +9,12 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.grey.shade100,
+
       appBar: AppBar(
         title: const Text("Women Safety App"),
-        backgroundColor: Colors.pink,
         centerTitle: true,
+        backgroundColor: Colors.pink,
         actions: [
           IconButton(
             icon: const Icon(Icons.logout),
@@ -29,10 +32,101 @@ class HomeScreen extends StatelessWidget {
         ],
       ),
 
-      body: const Center(
-        child: Text(
-          "Welcome to Women Safety App",
-          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+
+            children: [
+              const SizedBox(height: 20),
+
+              const Text(
+                "Welcome, Namrata 👋",
+                style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+              ),
+
+              const SizedBox(height: 40),
+
+              SizedBox(
+                height: 170,
+
+                child: ElevatedButton(
+                  onPressed: () {},
+
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.red,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                  ),
+
+                  child: const Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.warning, size: 60, color: Colors.white),
+
+                      SizedBox(height: 10),
+
+                      Text(
+                        "SOS",
+                        style: TextStyle(
+                          fontSize: 36,
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 25),
+
+              ElevatedButton.icon(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const ContactsScreen(),
+                    ),
+                  );
+                },
+
+                icon: const Icon(Icons.contacts),
+
+                label: const Text(
+                  "Emergency Contacts",
+                  style: TextStyle(fontSize: 18),
+                ),
+
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.pink,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 18),
+                ),
+              ),
+
+              const SizedBox(height: 15),
+
+              ElevatedButton.icon(
+                onPressed: () {},
+
+                icon: const Icon(Icons.person),
+
+                label: const Text("Profile", style: TextStyle(fontSize: 18)),
+
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.blue,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 18),
+                ),
+              ),
+
+              const SizedBox(height: 20),
+            ],
+          ),
         ),
       ),
     );
