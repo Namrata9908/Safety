@@ -1,132 +1,114 @@
 import 'package:flutter/material.dart';
-import '../../services/storage_service.dart';
-import '../auth/login_screen.dart';
+import '../../services/api_service.dart';
 import '../contacts/contacts_screen.dart';
+import '../auth/login_screen.dart';
+import '../../services/storage_service.dart';
+import '../../services/location_service.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
+  Future<void> logout(BuildContext context) async {
+    await StorageService.removeToken();
+
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(builder: (_) => const LoginScreen()),
+      (route) => false,
+    );
+  }
+
+  Future<void> triggerSOS(BuildContext context) async {
+    try {
+      final position = await LocationService.getCurrentLocation();
+
+      final response = await ApiService.triggerSOS(
+        position.latitude,
+        position.longitude,
+      );
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(response["message"]),
+          backgroundColor: Colors.red,
+        ),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(e.toString())));
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey.shade100,
-
       appBar: AppBar(
         title: const Text("Women Safety App"),
-        centerTitle: true,
         backgroundColor: Colors.pink,
+        centerTitle: true,
         actions: [
           IconButton(
             icon: const Icon(Icons.logout),
-            onPressed: () async {
-              await StorageService.removeToken();
-
-              if (!context.mounted) return;
-
-              Navigator.pushReplacement(
-                context,
-                MaterialPageRoute(builder: (_) => const LoginScreen()),
-              );
-            },
+            onPressed: () => logout(context),
           ),
         ],
       ),
 
       body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          children: [
+            const SizedBox(height: 20),
 
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
+            const Text(
+              "Welcome to Women Safety App",
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            ),
 
-            children: [
-              const SizedBox(height: 20),
+            const SizedBox(height: 40),
 
-              const Text(
-                "Welcome, Namrata 👋",
-                style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
-              ),
-
-              const SizedBox(height: 40),
-
-              SizedBox(
-                height: 170,
-
-                child: ElevatedButton(
-                  onPressed: () {},
-
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.red,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                  ),
-
-                  child: const Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.warning, size: 60, color: Colors.white),
-
-                      SizedBox(height: 10),
-
-                      Text(
-                        "SOS",
-                        style: TextStyle(
-                          fontSize: 36,
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
-                  ),
+            SizedBox(
+              width: double.infinity,
+              height: 70,
+              child: ElevatedButton.icon(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.red,
+                  foregroundColor: Colors.white,
+                ),
+                onPressed: () => triggerSOS(context),
+                icon: const Icon(Icons.warning, size: 30),
+                label: const Text(
+                  "TRIGGER SOS",
+                  style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
                 ),
               ),
+            ),
 
-              const SizedBox(height: 25),
+            const SizedBox(height: 30),
 
-              ElevatedButton.icon(
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.pink,
+                  foregroundColor: Colors.white,
+                ),
                 onPressed: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(
-                      builder: (context) => const ContactsScreen(),
-                    ),
+                    MaterialPageRoute(builder: (_) => const ContactsScreen()),
                   );
                 },
-
                 icon: const Icon(Icons.contacts),
-
                 label: const Text(
                   "Emergency Contacts",
                   style: TextStyle(fontSize: 18),
                 ),
-
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.pink,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 18),
-                ),
               ),
-
-              const SizedBox(height: 15),
-
-              ElevatedButton.icon(
-                onPressed: () {},
-
-                icon: const Icon(Icons.person),
-
-                label: const Text("Profile", style: TextStyle(fontSize: 18)),
-
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.blue,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 18),
-                ),
-              ),
-
-              const SizedBox(height: 20),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
