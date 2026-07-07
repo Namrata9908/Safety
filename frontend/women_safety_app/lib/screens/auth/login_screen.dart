@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../services/api_service.dart';
+import '../../services/storage_service.dart';
+import '../home/home_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -91,9 +93,26 @@ class _LoginScreenState extends State<LoginScreen> {
 
                     print(response);
 
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text(response["message"])),
-                    );
+                    // Save token only if login is successful
+                    // Save token only if login is successful
+                    if (response["token"] != null) {
+                      await StorageService.saveToken(response["token"]);
+
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text(response["message"])),
+                      );
+
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const HomeScreen(),
+                        ),
+                      );
+                    } else {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text(response["message"])),
+                      );
+                    }
                   },
 
                   style: ElevatedButton.styleFrom(

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'screens/auth/login_screen.dart';
+import 'screens/splash/splash_screen.dart';
 
 void main() {
   runApp(const WomenSafetyApp());
@@ -13,10 +13,8 @@ class WomenSafetyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Women Safety App',
-      theme: ThemeData(
-        primarySwatch: Colors.pink,
-      ),
-      home: const LoginScreen(),
+      theme: ThemeData(primarySwatch: Colors.pink),
+      home: const SplashScreen(),
     );
   }
 }
