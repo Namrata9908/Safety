@@ -86,32 +86,43 @@ class _LoginScreenState extends State<LoginScreen> {
 
                 child: ElevatedButton(
                   onPressed: () async {
-                    final response = await ApiService.login(
-                      emailController.text,
-                      passwordController.text,
-                    );
+                    print("STEP 1: Login button pressed");
 
-                    print(response);
-
-                    // Save token only if login is successful
-                    // Save token only if login is successful
-                    if (response["token"] != null) {
-                      await StorageService.saveToken(response["token"]);
-
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text(response["message"])),
+                    try {
+                      final response = await ApiService.login(
+                        emailController.text.trim(),
+                        passwordController.text.trim(),
                       );
 
-                      Navigator.pushReplacement(
+                      print("STEP 2: API Response");
+                      print(response);
+
+                      // Save token only if login is successful
+                      if (response["token"] != null) {
+                        await StorageService.saveToken(response["token"]);
+
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text(response["message"])),
+                        );
+
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const HomeScreen(),
+                          ),
+                        );
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text(response["message"])),
+                        );
+                      }
+                    } catch (e) {
+                      print("STEP 3: ERROR");
+                      print(e);
+
+                      ScaffoldMessenger.of(
                         context,
-                        MaterialPageRoute(
-                          builder: (context) => const HomeScreen(),
-                        ),
-                      );
-                    } else {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text(response["message"])),
-                      );
+                      ).showSnackBar(SnackBar(content: Text(e.toString())));
                     }
                   },
 

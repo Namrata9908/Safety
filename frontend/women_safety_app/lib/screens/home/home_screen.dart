@@ -4,6 +4,8 @@ import '../contacts/contacts_screen.dart';
 import '../auth/login_screen.dart';
 import '../../services/storage_service.dart';
 import '../../services/location_service.dart';
+import '../../services/sms_service.dart';
+import '../../services/map_service.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -20,12 +22,32 @@ class HomeScreen extends StatelessWidget {
 
   Future<void> triggerSOS(BuildContext context) async {
     try {
+      // Get current location
       final position = await LocationService.getCurrentLocation();
 
+      // Save SOS in MongoDB
       final response = await ApiService.triggerSOS(
         position.latitude,
         position.longitude,
       );
+
+      // Get emergency contacts
+      final contacts = await ApiService.getContacts();
+
+      // Extract phone numbers
+      List<String> phones = [];
+
+      for (var contact in contacts) {
+        phones.add(contact["phone"]);
+      }
+
+      // Open SMS app
+      if (phones.isNotEmpty) {
+        await SmsService.sendSOS(phones, position.latitude, position.longitude);
+      }
+
+      // Open Google Maps
+      await MapService.openMap(position.latitude, position.longitude);
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
