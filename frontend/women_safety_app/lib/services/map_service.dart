@@ -12,4 +12,14 @@ class MapService {
       throw "Could not open Google Maps";
     }
   }
+
+  static Future<void> openNearbyPlaces(String place) async {
+    final Uri uri = Uri.parse("https://www.google.com/maps/search/$place");
+
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    } else {
+      throw "Could not open Google Maps";
+    }
+  }
 }

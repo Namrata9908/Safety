@@ -8,11 +8,13 @@ import '../../services/map_service.dart';
 
 import '../contacts/contacts_screen.dart';
 import '../auth/login_screen.dart';
+import '../sos/sos_history_screen.dart';
 
 import '../../theme/app_theme.dart';
 
 import '../../widgets/sos_button.dart';
 import '../../widgets/safety_card.dart';
+import '../../widgets/safety_tips_card.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -75,7 +77,6 @@ class HomeScreen extends StatelessWidget {
       appBar: AppBar(
         title: const Text(
           "Women Safety App",
-
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
 
@@ -202,6 +203,55 @@ class HomeScreen extends StatelessWidget {
 
                     position.longitude,
                   );
+                } catch (e) {
+                  ScaffoldMessenger.of(
+                    context,
+                  ).showSnackBar(SnackBar(content: Text(e.toString())));
+                }
+              },
+            ),
+
+            const SizedBox(height: 15),
+
+            // Safety Tips
+            const SafetyTipsCard(),
+
+            const SizedBox(height: 15),
+
+            // SOS History
+            SafetyCard(
+              icon: Icons.history,
+
+              title: "SOS History",
+
+              subtitle: "View previous SOS alerts",
+
+              color: Colors.redAccent,
+
+              onTap: () {
+                Navigator.push(
+                  context,
+
+                  MaterialPageRoute(builder: (_) => const SosHistoryScreen()),
+                );
+              },
+            ),
+
+            const SizedBox(height: 15),
+
+            // Nearby Help
+            SafetyCard(
+              icon: Icons.local_hospital,
+
+              title: "Nearby Help",
+
+              subtitle: "Find police stations and hospitals",
+
+              color: Colors.orange,
+
+              onTap: () async {
+                try {
+                  await MapService.openNearbyPlaces("police station near me");
                 } catch (e) {
                   ScaffoldMessenger.of(
                     context,

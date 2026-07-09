@@ -12,7 +12,9 @@ class ApiService {
   ) async {
     final response = await http.post(
       Uri.parse("$baseUrl/users/login"),
+
       headers: {"Content-Type": "application/json"},
+
       body: jsonEncode({"email": email, "password": password}),
     );
 
@@ -29,13 +31,18 @@ class ApiService {
 
     final response = await http.post(
       Uri.parse("$baseUrl/contacts"),
+
       headers: {
         "Content-Type": "application/json",
+
         "Authorization": "Bearer $token",
       },
+
       body: jsonEncode({
         "name": name,
+
         "phone": phone,
+
         "relationship": relationship,
       }),
     );
@@ -49,8 +56,10 @@ class ApiService {
 
     final response = await http.get(
       Uri.parse("$baseUrl/contacts"),
+
       headers: {
         "Content-Type": "application/json",
+
         "Authorization": "Bearer $token",
       },
     );
@@ -64,8 +73,10 @@ class ApiService {
 
     final response = await http.delete(
       Uri.parse("$baseUrl/contacts/$id"),
+
       headers: {
         "Content-Type": "application/json",
+
         "Authorization": "Bearer $token",
       },
     );
@@ -76,21 +87,29 @@ class ApiService {
   // UPDATE CONTACT API
   static Future<Map<String, dynamic>> updateContact(
     String id,
+
     String name,
+
     String phone,
+
     String relationship,
   ) async {
     String? token = await StorageService.getToken();
 
     final response = await http.put(
       Uri.parse("$baseUrl/contacts/$id"),
+
       headers: {
         "Content-Type": "application/json",
+
         "Authorization": "Bearer $token",
       },
+
       body: jsonEncode({
         "name": name,
+
         "phone": phone,
+
         "relationship": relationship,
       }),
     );
@@ -98,22 +117,47 @@ class ApiService {
     return jsonDecode(response.body);
   }
 
-  // SOS API
+  // TRIGGER SOS API
   static Future<Map<String, dynamic>> triggerSOS(
     double latitude,
+
     double longitude,
   ) async {
     String? token = await StorageService.getToken();
 
     final response = await http.post(
       Uri.parse("$baseUrl/sos"),
+
       headers: {
         "Content-Type": "application/json",
+
         "Authorization": "Bearer $token",
       },
+
       body: jsonEncode({"latitude": latitude, "longitude": longitude}),
     );
 
     return jsonDecode(response.body);
+  }
+
+  // GET SOS HISTORY API
+  static Future<List<dynamic>> getSOSHistory() async {
+    String? token = await StorageService.getToken();
+
+    final response = await http.get(
+      Uri.parse("$baseUrl/sos/history"),
+
+      headers: {
+        "Content-Type": "application/json",
+
+        "Authorization": "Bearer $token",
+      },
+    );
+
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    } else {
+      throw Exception("Failed to load SOS history");
+    }
   }
 }
