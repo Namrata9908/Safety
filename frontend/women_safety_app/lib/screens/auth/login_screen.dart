@@ -12,135 +12,128 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController emailController = TextEditingController();
+
   final TextEditingController passwordController = TextEditingController();
+
+  bool hidePassword = true;
 
   @override
   void dispose() {
     emailController.dispose();
     passwordController.dispose();
+
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
+    final primaryColor = Theme.of(context).colorScheme.primary;
 
-      appBar: AppBar(
-        title: const Text("Login"),
-        backgroundColor: Colors.pink,
-        centerTitle: true,
-      ),
+    return Scaffold(
+      // changed here
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+
+      appBar: AppBar(title: const Text("Login"), centerTitle: true),
 
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
 
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+        child: Column(
+          children: [
+            const SizedBox(height: 40),
 
-            children: [
-              const SizedBox(height: 40),
+            Icon(Icons.security, size: 100, color: primaryColor),
 
-              const Icon(Icons.security, size: 100, color: Colors.pink),
+            const SizedBox(height: 20),
 
-              const SizedBox(height: 20),
+            const Text(
+              "Women Safety App",
 
-              const Text(
-                "Women Safety App",
-                style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+              style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+            ),
+
+            const SizedBox(height: 40),
+
+            TextField(
+              controller: emailController,
+
+              keyboardType: TextInputType.emailAddress,
+
+              decoration: const InputDecoration(
+                labelText: "Email",
+
+                prefixIcon: Icon(Icons.email),
               ),
+            ),
 
-              const SizedBox(height: 40),
+            const SizedBox(height: 20),
 
-              TextField(
-                controller: emailController,
-                keyboardType: TextInputType.emailAddress,
-                decoration: InputDecoration(
-                  labelText: "Email",
-                  prefixIcon: const Icon(Icons.email),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10),
+            TextField(
+              controller: passwordController,
+
+              obscureText: hidePassword,
+
+              decoration: InputDecoration(
+                labelText: "Password",
+
+                prefixIcon: const Icon(Icons.lock),
+
+                suffixIcon: IconButton(
+                  icon: Icon(
+                    hidePassword ? Icons.visibility_off : Icons.visibility,
                   ),
+
+                  onPressed: () {
+                    setState(() {
+                      hidePassword = !hidePassword;
+                    });
+                  },
                 ),
               ),
+            ),
 
-              const SizedBox(height: 20),
+            const SizedBox(height: 30),
 
-              TextField(
-                controller: passwordController,
-                obscureText: true,
-                decoration: InputDecoration(
-                  labelText: "Password",
-                  prefixIcon: const Icon(Icons.lock),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                ),
-              ),
+            SizedBox(
+              width: double.infinity,
 
-              const SizedBox(height: 30),
+              child: ElevatedButton(
+                onPressed: () async {
+                  try {
+                    final response = await ApiService.login(
+                      emailController.text.trim(),
 
-              SizedBox(
-                width: double.infinity,
+                      passwordController.text.trim(),
+                    );
 
-                child: ElevatedButton(
-                  onPressed: () async {
-                    print("STEP 1: Login button pressed");
+                    if (response["token"] != null) {
+                      await StorageService.saveToken(response["token"]);
 
-                    try {
-                      final response = await ApiService.login(
-                        emailController.text.trim(),
-                        passwordController.text.trim(),
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text(response["message"])),
                       );
 
-                      print("STEP 2: API Response");
-                      print(response);
-
-                      // Save token only if login is successful
-                      if (response["token"] != null) {
-                        await StorageService.saveToken(response["token"]);
-
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text(response["message"])),
-                        );
-
-                        Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const HomeScreen(),
-                          ),
-                        );
-                      } else {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text(response["message"])),
-                        );
-                      }
-                    } catch (e) {
-                      print("STEP 3: ERROR");
-                      print(e);
-
-                      ScaffoldMessenger.of(
+                      Navigator.pushReplacement(
                         context,
-                      ).showSnackBar(SnackBar(content: Text(e.toString())));
+
+                        MaterialPageRoute(builder: (_) => const HomeScreen()),
+                      );
+                    } else {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text(response["message"])),
+                      );
                     }
-                  },
+                  } catch (e) {
+                    ScaffoldMessenger.of(
+                      context,
+                    ).showSnackBar(SnackBar(content: Text(e.toString())));
+                  }
+                },
 
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.pink,
-                    padding: const EdgeInsets.symmetric(vertical: 15),
-                  ),
-
-                  child: const Text(
-                    "Login",
-                    style: TextStyle(fontSize: 18, color: Colors.white),
-                  ),
-                ),
+                child: const Text("Login", style: TextStyle(fontSize: 18)),
               ),
-
-              const SizedBox(height: 20),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

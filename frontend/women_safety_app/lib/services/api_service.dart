@@ -73,6 +73,31 @@ class ApiService {
     return jsonDecode(response.body);
   }
 
+  // UPDATE CONTACT API
+  static Future<Map<String, dynamic>> updateContact(
+    String id,
+    String name,
+    String phone,
+    String relationship,
+  ) async {
+    String? token = await StorageService.getToken();
+
+    final response = await http.put(
+      Uri.parse("$baseUrl/contacts/$id"),
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer $token",
+      },
+      body: jsonEncode({
+        "name": name,
+        "phone": phone,
+        "relationship": relationship,
+      }),
+    );
+
+    return jsonDecode(response.body);
+  }
+
   // SOS API
   static Future<Map<String, dynamic>> triggerSOS(
     double latitude,

@@ -1,10 +1,18 @@
 import 'package:flutter/material.dart';
+
 import '../../services/api_service.dart';
-import '../contacts/contacts_screen.dart';
-import '../auth/login_screen.dart';
 import '../../services/storage_service.dart';
 import '../../services/location_service.dart';
 import '../../services/sms_service.dart';
+import '../../services/map_service.dart';
+
+import '../contacts/contacts_screen.dart';
+import '../auth/login_screen.dart';
+
+import '../../theme/app_theme.dart';
+
+import '../../widgets/sos_button.dart';
+import '../../widgets/safety_card.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -21,7 +29,7 @@ class HomeScreen extends StatelessWidget {
 
   Future<void> triggerSOS(BuildContext context) async {
     try {
-      // Get current location
+      // Get Current Location
       final position = await LocationService.getCurrentLocation();
 
       // Save SOS in MongoDB
@@ -30,17 +38,16 @@ class HomeScreen extends StatelessWidget {
         position.longitude,
       );
 
-      // Get emergency contacts
+      // Get Emergency Contacts
       final contacts = await ApiService.getContacts();
 
-      // Extract phone numbers
       List<String> phones = [];
 
       for (var contact in contacts) {
         phones.add(contact["phone"]);
       }
 
-      // Open SMS app
+      // Open SMS
       if (phones.isNotEmpty) {
         await SmsService.sendSOS(phones, position.latitude, position.longitude);
       }
@@ -48,7 +55,7 @@ class HomeScreen extends StatelessWidget {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(response["message"]),
-          backgroundColor: Colors.red,
+          backgroundColor: AppTheme.danger,
         ),
       );
     } catch (e) {
@@ -60,14 +67,22 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final primaryColor = Theme.of(context).colorScheme.primary;
+
     return Scaffold(
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+
       appBar: AppBar(
-        title: const Text("Women Safety App"),
-        backgroundColor: Colors.pink,
-        centerTitle: true,
+        title: const Text(
+          "Women Safety App",
+
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
+
         actions: [
           IconButton(
             icon: const Icon(Icons.logout),
+
             onPressed: () => logout(context),
           ),
         ],
@@ -75,56 +90,124 @@ class HomeScreen extends StatelessWidget {
 
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
+
         child: Column(
           children: [
-            const SizedBox(height: 20),
+            // Welcome Card
+            Container(
+              width: double.infinity,
 
-            const Text(
-              "Welcome to Women Safety App",
-              textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              padding: const EdgeInsets.all(20),
+
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [primaryColor, AppTheme.secondary],
+                ),
+
+                borderRadius: BorderRadius.circular(25),
+              ),
+
+              child: const Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+
+                children: [
+                  Text(
+                    "Welcome 👋",
+
+                    style: TextStyle(
+                      color: Colors.white,
+
+                      fontSize: 22,
+
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+
+                  SizedBox(height: 10),
+
+                  Text(
+                    "Stay safe. Your safety is our priority.",
+
+                    style: TextStyle(color: Colors.white70, fontSize: 16),
+                  ),
+                ],
+              ),
             ),
+
+            const SizedBox(height: 35),
+
+            // SOS Button
+            SosButton(onPressed: () => triggerSOS(context)),
 
             const SizedBox(height: 40),
 
-            SizedBox(
-              width: double.infinity,
-              height: 70,
-              child: ElevatedButton.icon(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.red,
-                  foregroundColor: Colors.white,
-                ),
-                onPressed: () => triggerSOS(context),
-                icon: const Icon(Icons.warning, size: 30),
-                label: const Text(
-                  "TRIGGER SOS",
-                  style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-                ),
-              ),
+            // Emergency Contacts
+            SafetyCard(
+              icon: Icons.contacts,
+
+              title: "Emergency Contacts",
+
+              subtitle: "Manage your trusted contacts",
+
+              color: primaryColor,
+
+              onTap: () {
+                Navigator.push(
+                  context,
+
+                  MaterialPageRoute(builder: (_) => const ContactsScreen()),
+                );
+              },
             ),
 
-            const SizedBox(height: 30),
+            const SizedBox(height: 15),
 
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton.icon(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.pink,
-                  foregroundColor: Colors.white,
-                ),
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (_) => const ContactsScreen()),
+            // Emergency Call
+            SafetyCard(
+              icon: Icons.call,
+
+              title: "Emergency Call",
+
+              subtitle: "Quick access to trusted contacts",
+
+              color: Colors.green,
+
+              onTap: () {
+                Navigator.push(
+                  context,
+
+                  MaterialPageRoute(builder: (_) => const ContactsScreen()),
+                );
+              },
+            ),
+
+            const SizedBox(height: 15),
+
+            // Live Location
+            SafetyCard(
+              icon: Icons.location_on,
+
+              title: "Live Location",
+
+              subtitle: "Tap to view your current location",
+
+              color: Colors.red,
+
+              onTap: () async {
+                try {
+                  final position = await LocationService.getCurrentLocation();
+
+                  await MapService.openMap(
+                    position.latitude,
+
+                    position.longitude,
                   );
-                },
-                icon: const Icon(Icons.contacts),
-                label: const Text(
-                  "Emergency Contacts",
-                  style: TextStyle(fontSize: 18),
-                ),
-              ),
+                } catch (e) {
+                  ScaffoldMessenger.of(
+                    context,
+                  ).showSnackBar(SnackBar(content: Text(e.toString())));
+                }
+              },
             ),
           ],
         ),

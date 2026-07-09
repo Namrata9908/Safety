@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+
 import '../../services/storage_service.dart';
+
 import '../auth/login_screen.dart';
+
 import '../home/home_screen.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -14,6 +17,7 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
+
     checkLogin();
   }
 
@@ -27,40 +31,47 @@ class _SplashScreenState extends State<SplashScreen> {
     if (token != null) {
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(
-          builder: (_) => const HomeScreen(),
-        ),
+
+        MaterialPageRoute(builder: (_) => const HomeScreen()),
       );
     } else {
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(
-          builder: (_) => const LoginScreen(),
-        ),
+
+        MaterialPageRoute(builder: (_) => const LoginScreen()),
       );
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
-      backgroundColor: Colors.pink,
+    return Scaffold(
+      backgroundColor: Theme.of(context).colorScheme.primary,
+
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
+
           children: [
-            Icon(Icons.security, size: 100, color: Colors.white),
-            SizedBox(height: 20),
-            Text(
+            const Icon(Icons.security, size: 100, color: Colors.white),
+
+            const SizedBox(height: 20),
+
+            const Text(
               "Women Safety App",
+
               style: TextStyle(
                 color: Colors.white,
+
                 fontSize: 28,
+
                 fontWeight: FontWeight.bold,
               ),
             ),
-            SizedBox(height: 30),
-            CircularProgressIndicator(color: Colors.white),
+
+            const SizedBox(height: 30),
+
+            const CircularProgressIndicator(color: Colors.white),
           ],
         ),
       ),
