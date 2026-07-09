@@ -40,9 +40,7 @@ class ApiService {
 
       body: jsonEncode({
         "name": name,
-
         "phone": phone,
-
         "relationship": relationship,
       }),
     );
@@ -144,8 +142,37 @@ class ApiService {
   static Future<List<dynamic>> getSOSHistory() async {
     String? token = await StorageService.getToken();
 
+    if (token == null) {
+      throw Exception("User not logged in");
+    }
+
     final response = await http.get(
       Uri.parse("$baseUrl/sos/history"),
+
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer $token",
+      },
+    );
+
+    print("SOS HISTORY STATUS : ${response.statusCode}");
+    print("SOS HISTORY DATA : ${response.body}");
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+
+      return List<dynamic>.from(data);
+    } else {
+      throw Exception("Failed to load SOS History ${response.statusCode}");
+    }
+  }
+
+  // RESOLVE SOS API
+  static Future<Map<String, dynamic>> resolveSOS(String id) async {
+    String? token = await StorageService.getToken();
+
+    final response = await http.put(
+      Uri.parse("$baseUrl/sos/$id/resolve"),
 
       headers: {
         "Content-Type": "application/json",
@@ -154,10 +181,13 @@ class ApiService {
       },
     );
 
+    print("RESOLVE STATUS : ${response.statusCode}");
+    print("RESOLVE DATA : ${response.body}");
+
     if (response.statusCode == 200) {
       return jsonDecode(response.body);
     } else {
-      throw Exception("Failed to load SOS history");
+      throw Exception("Failed to resolve SOS");
     }
   }
 }
