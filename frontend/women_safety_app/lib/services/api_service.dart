@@ -5,6 +5,23 @@ import 'storage_service.dart';
 class ApiService {
   static const String baseUrl = "http://192.168.0.107:5000/api";
 
+  // REGISTER API
+  static Future<Map<String, dynamic>> register(
+    String name,
+    String email,
+    String password,
+  ) async {
+    final response = await http.post(
+      Uri.parse("$baseUrl/users/register"),
+
+      headers: {"Content-Type": "application/json"},
+
+      body: jsonEncode({"name": name, "email": email, "password": password}),
+    );
+
+    return jsonDecode(response.body);
+  }
+
   // LOGIN API
   static Future<Map<String, dynamic>> login(
     String email,
