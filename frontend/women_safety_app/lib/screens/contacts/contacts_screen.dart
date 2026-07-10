@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+
 import '../../services/api_service.dart';
+import '../../services/call_service.dart';
+
 import 'add_contact_screen.dart';
 import 'edit_contact_screen.dart';
-import '../../services/call_service.dart';
 
 class ContactsScreen extends StatefulWidget {
   const ContactsScreen({super.key});
@@ -27,12 +29,15 @@ class _ContactsScreenState extends State<ContactsScreen> {
     try {
       final data = await ApiService.getContacts();
 
+      if (!mounted) return;
+
       setState(() {
         contacts = data;
-
         isLoading = false;
       });
     } catch (e) {
+      if (!mounted) return;
+
       setState(() {
         isLoading = false;
       });
@@ -44,13 +49,19 @@ class _ContactsScreenState extends State<ContactsScreen> {
   }
 
   Future<void> deleteContact(String id) async {
-    final response = await ApiService.deleteContact(id);
+    try {
+      final response = await ApiService.deleteContact(id);
 
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text(response["message"])));
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(response["message"])));
 
-    loadContacts();
+      loadContacts();
+    } catch (e) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(e.toString())));
+    }
   }
 
   @override
@@ -59,7 +70,10 @@ class _ContactsScreenState extends State<ContactsScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Emergency Contacts"),
+        title: const Text(
+          "Emergency Contacts",
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
 
         backgroundColor: primaryColor,
 
@@ -72,12 +86,11 @@ class _ContactsScreenState extends State<ContactsScreen> {
           ? const Center(
               child: Text(
                 "No Contacts Found",
-
                 style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
               ),
             )
           : ListView.builder(
-              padding: const EdgeInsets.only(bottom: 90),
+              padding: const EdgeInsets.only(bottom: 90, top: 10),
 
               itemCount: contacts.length,
 
@@ -87,123 +100,142 @@ class _ContactsScreenState extends State<ContactsScreen> {
                 return Card(
                   margin: const EdgeInsets.symmetric(
                     horizontal: 15,
-
                     vertical: 8,
                   ),
 
-                  child: ListTile(
-                    leading: CircleAvatar(
-                      backgroundColor: primaryColor,
+                  elevation: 4,
 
-                      child: const Icon(Icons.person, color: Colors.white),
-                    ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(20),
+                  ),
 
-                    title: Text(
-                      contact["name"],
-                      style: const TextStyle(fontWeight: FontWeight.bold),
-                    ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(15),
 
-                    subtitle: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-
+                    child: Row(
                       children: [
-                        SizedBox(
-                          width: 160,
-                          child: Text(
-                            contact["phone"],
-                            style: const TextStyle(fontSize: 16),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
+                        // Profile Icon
+                        CircleAvatar(
+                          radius: 35,
+                          backgroundColor: primaryColor,
+                          child: const Icon(
+                            Icons.person,
+                            color: Colors.white,
+                            size: 35,
                           ),
                         ),
 
-                        Text("Relationship: ${contact["relationship"]}"),
-                      ],
-                    ),
+                        const SizedBox(width: 15),
 
-                    trailing: Row(
-                      mainAxisSize: MainAxisSize.min,
+                        // Contact Details
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
 
-                      children: [
-                        IconButton(
-                          icon: const Icon(Icons.call, color: Colors.green),
-
-                          onPressed: () async {
-                            try {
-                              await CallService.makeCall(contact["phone"]);
-                            } catch (e) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(content: Text(e.toString())),
-                              );
-                            }
-                          },
-                        ),
-                        IconButton(
-                          icon: const Icon(Icons.edit, color: Colors.blue),
-
-                          onPressed: () async {
-                            final result = await Navigator.push(
-                              context,
-
-                              MaterialPageRoute(
-                                builder: (_) =>
-                                    EditContactScreen(contact: contact),
-                              ),
-                            );
-
-                            if (result == true) {
-                              loadContacts();
-                            }
-                          },
-                        ),
-
-                        IconButton(
-                          icon: const Icon(Icons.delete, color: Colors.red),
-
-                          onPressed: () {
-                            showDialog(
-                              context: context,
-
-                              builder: (context) => AlertDialog(
-                                title: const Text("Delete Contact"),
-
-                                content: const Text(
-                                  "Are you sure you want to delete this contact?",
+                            children: [
+                              Text(
+                                contact["name"],
+                                style: const TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
                                 ),
+                              ),
 
-                                actions: [
-                                  TextButton(
-                                    onPressed: () {
-                                      Navigator.pop(context);
-                                    },
+                              const SizedBox(height: 8),
 
-                                    child: const Text("Cancel"),
+                              Text(
+                                contact["phone"],
+                                style: const TextStyle(fontSize: 16),
+                              ),
+
+                              const SizedBox(height: 5),
+
+                              Text(
+                                "Relationship: ${contact["relationship"]}",
+                                style: const TextStyle(fontSize: 16),
+                              ),
+                            ],
+                          ),
+                        ),
+
+                        // Icons
+                        Column(
+                          children: [
+                            IconButton(
+                              icon: const Icon(Icons.call, color: Colors.green),
+
+                              onPressed: () async {
+                                await CallService.makeCall(contact["phone"]);
+                              },
+                            ),
+
+                            IconButton(
+                              icon: const Icon(Icons.edit, color: Colors.blue),
+
+                              onPressed: () async {
+                                final result = await Navigator.push(
+                                  context,
+
+                                  MaterialPageRoute(
+                                    builder: (_) =>
+                                        EditContactScreen(contact: contact),
                                   ),
+                                );
 
-                                  ElevatedButton(
-                                    style: ElevatedButton.styleFrom(
-                                      backgroundColor: Colors.red,
+                                if (result == true) {
+                                  loadContacts();
+                                }
+                              },
+                            ),
 
-                                      foregroundColor: Colors.white,
+                            IconButton(
+                              icon: const Icon(Icons.delete, color: Colors.red),
+
+                              onPressed: () {
+                                showDialog(
+                                  context: context,
+
+                                  builder: (context) => AlertDialog(
+                                    title: const Text("Delete Contact"),
+
+                                    content: const Text(
+                                      "Are you sure you want to delete this contact?",
                                     ),
 
-                                    onPressed: () async {
-                                      Navigator.pop(context);
+                                    actions: [
+                                      TextButton(
+                                        onPressed: () {
+                                          Navigator.pop(context);
+                                        },
 
-                                      await deleteContact(contact["_id"]);
-                                    },
+                                        child: const Text("Cancel"),
+                                      ),
 
-                                    child: const Text("Delete"),
+                                      ElevatedButton(
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor: Colors.red,
+                                          foregroundColor: Colors.white,
+                                        ),
+
+                                        onPressed: () async {
+                                          Navigator.pop(context);
+
+                                          await deleteContact(contact["_id"]);
+                                        },
+
+                                        child: const Text("Delete"),
+                                      ),
+                                    ],
                                   ),
-                                ],
-                              ),
-                            );
-                          },
+                                );
+                              },
+                            ),
+                          ],
                         ),
                       ],
                     ),
                   ),
-                );
+                );git 
               },
             ),
 
