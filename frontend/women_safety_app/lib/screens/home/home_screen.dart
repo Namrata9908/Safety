@@ -49,15 +49,26 @@ class HomeScreen extends StatelessWidget {
         phones.add(contact["phone"]);
       }
 
-      // Open SMS
+      String message;
+
+      // If contacts available -> Send SMS
       if (phones.isNotEmpty) {
         await SmsService.sendSOS(phones, position.latitude, position.longitude);
+
+        message = response["message"];
+      }
+      // If no contacts available
+      else {
+        message =
+            "SOS Saved Successfully\n"
+            "Please add emergency contacts to send SMS alerts";
       }
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(response["message"]),
+          content: Text(message),
           backgroundColor: AppTheme.danger,
+          duration: const Duration(seconds: 4),
         ),
       );
     } catch (e) {
@@ -245,7 +256,7 @@ class HomeScreen extends StatelessWidget {
 
               title: "Nearby Help",
 
-              subtitle: "Find police stations and hospitals",
+              subtitle: "Find police stations",
 
               color: Colors.orange,
 
