@@ -107,7 +107,15 @@ class _ContactsScreenState extends State<ContactsScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
 
                       children: [
-                        Text(contact["phone"]),
+                        SizedBox(
+                          width: 160,
+                          child: Text(
+                            contact["phone"],
+                            style: const TextStyle(fontSize: 16),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
 
                         Text("Relationship: ${contact["relationship"]}"),
                       ],
