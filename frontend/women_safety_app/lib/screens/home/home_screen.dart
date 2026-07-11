@@ -149,7 +149,11 @@ class HomeScreen extends StatelessWidget {
             const SizedBox(height: 35),
 
             // SOS Button
-            SosButton(onPressed: () => triggerSOS(context)),
+            SosButton(
+              onPressed: () async {
+                await triggerSOS(context);
+              },
+            ),
 
             const SizedBox(height: 40),
 

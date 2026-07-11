@@ -1,7 +1,8 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 
 class SosButton extends StatefulWidget {
-  final VoidCallback onPressed;
+  final Future<void> Function() onPressed;
 
   const SosButton({super.key, required this.onPressed});
 
@@ -13,6 +14,9 @@ class _SosButtonState extends State<SosButton>
     with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _animation;
+
+  int countdown = 0;
+  bool isCounting = false;
 
   @override
   void initState() {
@@ -35,13 +39,37 @@ class _SosButtonState extends State<SosButton>
     super.dispose();
   }
 
+  Future<void> startCountdown() async {
+    if (isCounting) return;
+
+    setState(() {
+      isCounting = true;
+      countdown = 3;
+    });
+
+    for (int i = 3; i > 0; i--) {
+      setState(() {
+        countdown = i;
+      });
+
+      await Future.delayed(const Duration(seconds: 1));
+    }
+
+    setState(() {
+      isCounting = false;
+      countdown = 0;
+    });
+
+    await widget.onPressed();
+  }
+
   @override
   Widget build(BuildContext context) {
     return ScaleTransition(
       scale: _animation,
 
       child: GestureDetector(
-        onTap: widget.onPressed,
+        onTap: startCountdown,
 
         child: Container(
           height: 170,
@@ -64,18 +92,24 @@ class _SosButtonState extends State<SosButton>
             ],
           ),
 
-          child: const Column(
+          child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
 
             children: [
-              Icon(Icons.warning, color: Colors.white, size: 45),
+              Icon(
+                isCounting ? Icons.timer : Icons.warning,
 
-              SizedBox(height: 8),
+                color: Colors.white,
+
+                size: 45,
+              ),
+
+              const SizedBox(height: 8),
 
               Text(
-                "SOS",
+                isCounting ? "$countdown" : "SOS",
 
-                style: TextStyle(
+                style: const TextStyle(
                   color: Colors.white,
 
                   fontSize: 32,
@@ -84,12 +118,12 @@ class _SosButtonState extends State<SosButton>
                 ),
               ),
 
-              SizedBox(height: 5),
+              const SizedBox(height: 5),
 
               Text(
-                "Tap for Help",
+                isCounting ? "Sending..." : "Tap for Help",
 
-                style: TextStyle(color: Colors.white, fontSize: 13),
+                style: const TextStyle(color: Colors.white, fontSize: 13),
               ),
             ],
           ),
