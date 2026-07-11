@@ -3,8 +3,9 @@ import 'package:flutter/material.dart';
 
 class SosButton extends StatefulWidget {
   final Future<void> Function() onPressed;
+  final VoidCallback onCancel;
 
-  const SosButton({super.key, required this.onPressed});
+  const SosButton({super.key, required this.onPressed, required this.onCancel});
 
   @override
   State<SosButton> createState() => _SosButtonState();
@@ -76,6 +77,8 @@ class _SosButtonState extends State<SosButton>
 
       countdown = 3;
     });
+
+    widget.onCancel();
   }
 
   @override
@@ -174,4 +177,3 @@ class _SosButtonState extends State<SosButton>
     );
   }
 }
-git 

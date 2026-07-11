@@ -24,23 +24,22 @@ class HomeScreen extends StatelessWidget {
 
     Navigator.pushAndRemoveUntil(
       context,
+
       MaterialPageRoute(builder: (_) => const LoginScreen()),
+
       (route) => false,
     );
   }
 
   Future<void> triggerSOS(BuildContext context) async {
     try {
-      // Get Current Location
       final position = await LocationService.getCurrentLocation();
 
-      // Save SOS in MongoDB
       final response = await ApiService.triggerSOS(
         position.latitude,
         position.longitude,
       );
 
-      // Get Emergency Contacts
       final contacts = await ApiService.getContacts();
 
       List<String> phones = [];
@@ -51,14 +50,11 @@ class HomeScreen extends StatelessWidget {
 
       String message;
 
-      // If contacts available -> Send SMS
       if (phones.isNotEmpty) {
         await SmsService.sendSOS(phones, position.latitude, position.longitude);
 
         message = response["message"];
-      }
-      // If no contacts available
-      else {
+      } else {
         message =
             "SOS Saved Successfully\n"
             "Please add emergency contacts to send SMS alerts";
@@ -67,7 +63,9 @@ class HomeScreen extends StatelessWidget {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(message),
+
           backgroundColor: AppTheme.danger,
+
           duration: const Duration(seconds: 4),
         ),
       );
@@ -105,7 +103,6 @@ class HomeScreen extends StatelessWidget {
 
         child: Column(
           children: [
-            // Welcome Card
             Container(
               width: double.infinity,
 
@@ -148,16 +145,27 @@ class HomeScreen extends StatelessWidget {
 
             const SizedBox(height: 35),
 
-            // SOS Button
+            // SOS BUTTON UPDATED
             SosButton(
               onPressed: () async {
                 await triggerSOS(context);
+              },
+
+              onCancel: () {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text("SOS Cancelled"),
+
+                    backgroundColor: Colors.grey,
+
+                    duration: Duration(seconds: 2),
+                  ),
+                );
               },
             ),
 
             const SizedBox(height: 40),
 
-            // Emergency Contacts
             SafetyCard(
               icon: Icons.contacts,
 
@@ -178,7 +186,6 @@ class HomeScreen extends StatelessWidget {
 
             const SizedBox(height: 15),
 
-            // Emergency Call
             SafetyCard(
               icon: Icons.call,
 
@@ -199,7 +206,6 @@ class HomeScreen extends StatelessWidget {
 
             const SizedBox(height: 15),
 
-            // Live Location
             SafetyCard(
               icon: Icons.location_on,
 
@@ -228,12 +234,10 @@ class HomeScreen extends StatelessWidget {
 
             const SizedBox(height: 15),
 
-            // Safety Tips
             const SafetyTipsCard(),
 
             const SizedBox(height: 15),
 
-            // SOS History
             SafetyCard(
               icon: Icons.history,
 
@@ -254,7 +258,6 @@ class HomeScreen extends StatelessWidget {
 
             const SizedBox(height: 15),
 
-            // Nearby Help
             SafetyCard(
               icon: Icons.local_hospital,
 
