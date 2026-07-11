@@ -15,8 +15,10 @@ class _SosButtonState extends State<SosButton>
   late AnimationController _controller;
   late Animation<double> _animation;
 
-  int countdown = 0;
   bool isCounting = false;
+  int countdown = 3;
+
+  Timer? timer;
 
   @override
   void initState() {
@@ -35,100 +37,141 @@ class _SosButtonState extends State<SosButton>
 
   @override
   void dispose() {
+    timer?.cancel();
+
     _controller.dispose();
+
     super.dispose();
   }
 
-  Future<void> startCountdown() async {
-    if (isCounting) return;
-
+  void startCountdown() {
     setState(() {
       isCounting = true;
+
       countdown = 3;
     });
 
-    for (int i = 3; i > 0; i--) {
-      setState(() {
-        countdown = i;
-      });
+    timer = Timer.periodic(const Duration(seconds: 1), (timer) async {
+      if (countdown == 1) {
+        timer.cancel();
 
-      await Future.delayed(const Duration(seconds: 1));
-    }
+        setState(() {
+          isCounting = false;
+        });
+
+        await widget.onPressed();
+      } else {
+        setState(() {
+          countdown--;
+        });
+      }
+    });
+  }
+
+  void cancelSOS() {
+    timer?.cancel();
 
     setState(() {
       isCounting = false;
-      countdown = 0;
-    });
 
-    await widget.onPressed();
+      countdown = 3;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    return ScaleTransition(
-      scale: _animation,
+    return Column(
+      children: [
+        ScaleTransition(
+          scale: _animation,
 
-      child: GestureDetector(
-        onTap: startCountdown,
+          child: GestureDetector(
+            onTap: isCounting ? null : startCountdown,
 
-        child: Container(
-          height: 170,
+            child: Container(
+              height: 170,
 
-          width: 170,
+              width: 170,
 
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
 
-            color: Colors.red,
+                color: Colors.red,
 
-            boxShadow: [
-              BoxShadow(
-                color: Colors.red.withOpacity(0.45),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.red.withOpacity(0.45),
 
-                blurRadius: 30,
+                    blurRadius: 30,
 
-                spreadRadius: 8,
-              ),
-            ],
-          ),
-
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-
-            children: [
-              Icon(
-                isCounting ? Icons.timer : Icons.warning,
-
-                color: Colors.white,
-
-                size: 45,
+                    spreadRadius: 8,
+                  ),
+                ],
               ),
 
-              const SizedBox(height: 8),
+              child: Center(
+                child: isCounting
+                    ? Text(
+                        "$countdown",
 
-              Text(
-                isCounting ? "$countdown" : "SOS",
+                        style: const TextStyle(
+                          color: Colors.white,
 
-                style: const TextStyle(
-                  color: Colors.white,
+                          fontSize: 50,
 
-                  fontSize: 32,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      )
+                    : const Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
 
-                  fontWeight: FontWeight.bold,
-                ),
+                        children: [
+                          Icon(Icons.warning, color: Colors.white, size: 45),
+
+                          SizedBox(height: 8),
+
+                          Text(
+                            "SOS",
+
+                            style: TextStyle(
+                              color: Colors.white,
+
+                              fontSize: 32,
+
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+
+                          SizedBox(height: 5),
+
+                          Text(
+                            "Tap for Help",
+
+                            style: TextStyle(color: Colors.white, fontSize: 13),
+                          ),
+                        ],
+                      ),
               ),
-
-              const SizedBox(height: 5),
-
-              Text(
-                isCounting ? "Sending..." : "Tap for Help",
-
-                style: const TextStyle(color: Colors.white, fontSize: 13),
-              ),
-            ],
+            ),
           ),
         ),
-      ),
+
+        const SizedBox(height: 20),
+
+        if (isCounting)
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.grey,
+
+              foregroundColor: Colors.white,
+            ),
+
+            onPressed: cancelSOS,
+
+            child: const Text("Cancel SOS", style: TextStyle(fontSize: 18)),
+          ),
+      ],
     );
   }
 }
+git 
